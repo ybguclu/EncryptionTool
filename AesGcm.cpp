@@ -120,7 +120,13 @@ bool AesGcm::Encrypt(
     }
 
     // 10. Çıktı paketini oluştur: [Salt (16B)] + [Nonce (12B)] + [Tag (16B)] + [Ciphertext]
-    outData.reserve(SALT_SIZE + NONCE_SIZE + TAG_SIZE + ciphertext.size());
+ // 10. Sürümlenmiş Çıktı paketini oluştur: [Version(1B)] + [AlgoID(1B)] + [Salt(16B)] + [Nonce(12B)] + [Tag(16B)] + [Ciphertext]
+    constexpr uint8_t FORMAT_VERSION = 0x01;
+    constexpr uint8_t ALGO_ID_GCM = 0x01;
+
+    outData.reserve(2 + SALT_SIZE + NONCE_SIZE + TAG_SIZE + ciphertext.size());
+    outData.push_back(FORMAT_VERSION);
+    outData.push_back(ALGO_ID_GCM);
     outData.insert(outData.end(), salt, salt + SALT_SIZE);
     outData.insert(outData.end(), nonce, nonce + NONCE_SIZE);
     outData.insert(outData.end(), tag, tag + TAG_SIZE);

@@ -20,8 +20,9 @@ private:
     static constexpr const wchar_t* DEV_TITLE = L"C++ Yazılım Geliştirici";
     static constexpr const wchar_t* DEV_EMAIL = L"yunusberkan125@gmail.com";
     static constexpr const wchar_t* DEV_BIO = L"Bu uygulama, Windows üzerinde yüksek güvenlikli ve hızlı metin şifreleme ihtiyacı için Native C++17 ve OpenSSL kullanılarak geliştirilmiştir. Tamamen ücretsizdir.";
-    static constexpr const wchar_t* DEV_WEBSITE = L"https://github.com/ybguclu";
-    static constexpr const wchar_t* APP_VERSION = L"v1.0.0 (x64)";
+    static constexpr const wchar_t* DEV_WEBSITE = L"https://github.com/ybguclu/EncryptionTool";
+    static constexpr const wchar_t* APP_VERSION = L"v1.0.1 (x64)";
+
 
     // Buton Kimlikleri
     static constexpr int ID_BTN_WEBSITE = 201;

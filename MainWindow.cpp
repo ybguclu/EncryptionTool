@@ -18,21 +18,21 @@ MainWindow::MainWindow(HINSTANCE hInstance)
     m_hBrushBg(nullptr), m_hBrushOutputBg(nullptr),
     m_hEditInput(nullptr), m_hListAlgo(nullptr), m_hEditPassword(nullptr),
     m_hChkShowPass(nullptr), m_hBtnEncrypt(nullptr), m_hBtnClear(nullptr),
-    m_hEditOutput(nullptr), m_hBtnCopy(nullptr), m_hStatusBar(nullptr) {
+    m_hEditOutput(nullptr), m_hBtnCopy(nullptr), m_hStatusBar(nullptr),
+    m_hBtnAbout(nullptr) {
 }
 
 MainWindow::~MainWindow() {
-    if (m_hFontTitle)    DeleteObject(m_hFontTitle);
-    if (m_hFontSubTitle) DeleteObject(m_hFontSubTitle);
-    if (m_hFontBold)     DeleteObject(m_hFontBold);
-    if (m_hFontNormal)   DeleteObject(m_hFontNormal);
-    if (m_hFontMono)     DeleteObject(m_hFontMono);
-    if (m_hBrushBg)      DeleteObject(m_hBrushBg);
-    if (m_hBrushOutputBg)DeleteObject(m_hBrushOutputBg);
+    if (m_hFontTitle)     DeleteObject(m_hFontTitle);
+    if (m_hFontSubTitle)  DeleteObject(m_hFontSubTitle);
+    if (m_hFontBold)      DeleteObject(m_hFontBold);
+    if (m_hFontNormal)    DeleteObject(m_hFontNormal);
+    if (m_hFontMono)      DeleteObject(m_hFontMono);
+    if (m_hBrushBg)       DeleteObject(m_hBrushBg);
+    if (m_hBrushOutputBg) DeleteObject(m_hBrushOutputBg);
 }
 
 bool MainWindow::Create() {
-    // Common Controls (Status Bar ve Cue Banner için) başlat
     INITCOMMONCONTROLSEX icex = {};
     icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     icex.dwICC = ICC_WIN95_CLASSES | ICC_BAR_CLASSES;
@@ -40,9 +40,7 @@ bool MainWindow::Create() {
 
     const wchar_t CLASS_NAME[] = L"EncryptionToolWindowClass";
 
-    // Ferah açık gri-beyaz arka plan fırçası (#F4F6F9)
     m_hBrushBg = CreateSolidBrush(RGB(244, 246, 249));
-    // Şifreli çıktı kutusu için hafif soğuk gri-mavi arka plan (#EBF0F5)
     m_hBrushOutputBg = CreateSolidBrush(RGB(235, 240, 245));
 
     WNDCLASSEXW wc = {};
@@ -52,7 +50,7 @@ bool MainWindow::Create() {
     wc.lpszClassName = CLASS_NAME;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.hbrBackground = m_hBrushBg;
-    wc.hIcon = LoadIcon(nullptr, IDI_SHIELD); // Güvenlik kalkanı ikonu
+    wc.hIcon = LoadIcon(nullptr, IDI_SHIELD);
     wc.hIconSm = LoadIcon(nullptr, IDI_SHIELD);
 
     if (!RegisterClassExW(&wc)) {
@@ -135,7 +133,6 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         return 0;
     }
 
-                 // Etiketlerin (STATIC) ve Salt Okunur Çıktı kutusunun arka plan rengini özelleştir
     case WM_CTLCOLORSTATIC: {
         HDC hdcStatic = (HDC)wParam;
         HWND hCtrl = (HWND)lParam;
@@ -169,7 +166,6 @@ LRESULT MainWindow::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             case ID_CHK_SHOWPASS:
                 OnTogglePassword();
                 return 0;
-
             case ID_BTN_ABOUT:
                 OnAboutClicked();
                 return 0;
@@ -190,7 +186,7 @@ void MainWindow::DrawHeader(HDC hdc) {
     RECT rcClient = {};
     GetClientRect(m_hwnd, &rcClient);
 
-    // Üst Başlık Bandı (Modern Koyu Lacivert #1A2B4C)
+    // Üst Başlık Bandı (Koyu Lacivert #1A2B4C)
     RECT rcHeader = { 0, 0, rcClient.right, 68 };
     HBRUSH hHeaderBrush = CreateSolidBrush(RGB(26, 43, 76));
     FillRect(hdc, &rcHeader, hHeaderBrush);
@@ -216,7 +212,6 @@ void MainWindow::DrawHeader(HDC hdc) {
 }
 
 void MainWindow::CreateControls() {
-    // Yazı Tiplerini Oluştur
     m_hFontTitle = CreateFontW(24, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
         DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
         DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
@@ -233,7 +228,6 @@ void MainWindow::CreateControls() {
         DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
         DEFAULT_PITCH | FF_DONTCARE, L"Segoe UI");
 
-    // Şifreli Base64 çıktısı için Monospace (Consolas) kod yazı tipi
     m_hFontMono = CreateFontW(16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
         DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
         FIXED_PITCH | FF_MODERN, L"Consolas");
@@ -263,6 +257,7 @@ void MainWindow::CreateControls() {
         24, 258, 230, 68, m_hwnd, (HMENU)ID_LIST_ALGO, m_hInstance, nullptr);
     SetFont(m_hListAlgo, m_hFontNormal);
 
+    // CryptoManager üzerinden aktif algoritmaları (AES-256-GCM ve AES-256-CBC) yükle
     const auto& algorithms = m_cryptoManager.GetAvailableAlgorithms();
     for (const auto& algo : algorithms) {
         LRESULT index = SendMessageW(m_hListAlgo, LB_ADDSTRING, 0, (LPARAM)algo->GetName().c_str());
@@ -299,7 +294,7 @@ void MainWindow::CreateControls() {
     SetFont(m_hBtnClear, m_hFontNormal);
 
     // --- BÖLÜM 4: Şifreli Metin Çıktı Alanı ---
-    HWND hLblOutput = CreateWindowExW(0, L"STATIC", L"Şifreli Çıktı (Base64 Paketi: Salt + Nonce + Tag + Ciphertext):",
+    HWND hLblOutput = CreateWindowExW(0, L"STATIC", L"Şifreli Çıktı (Sürümlenmiş Base64 Paketi):",
         WS_CHILD | WS_VISIBLE, 24, 398, 500, 22, m_hwnd, nullptr, m_hInstance, nullptr);
     SetFont(hLblOutput, m_hFontBold);
 
@@ -322,7 +317,7 @@ void MainWindow::CreateControls() {
     std::wstring initStatus = L" Hazır  |  Motor: " + CryptoManager::GetOpenSSLVersion();
     SetStatusText(initStatus);
 
-    // Üst Başlık Bandının Sağ Köşesine "Hakkında" Butonu
+    // --- BÖLÜM 7: Üst Başlık Bandındaki "Hakkında" Butonu ---
     m_hBtnAbout = CreateWindowExW(0, L"BUTTON", L"ℹ Hakkında",
         WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON,
         435, 20, 105, 30, m_hwnd, (HMENU)ID_BTN_ABOUT, m_hInstance, nullptr);
@@ -338,11 +333,9 @@ void MainWindow::SetStatusText(const std::wstring& text) {
 void MainWindow::OnTogglePassword() {
     LRESULT checked = SendMessageW(m_hChkShowPass, BM_GETCHECK, 0, 0);
     if (checked == BST_CHECKED) {
-        // Parola maskesini kaldır (Düz metin göster)
         SendMessageW(m_hEditPassword, EM_SETPASSWORDCHAR, 0, 0);
     }
     else {
-        // Varsayılan parola karakterini (●) geri yükle
         SendMessageW(m_hEditPassword, EM_SETPASSWORDCHAR, (WPARAM)L'●', 0);
     }
     InvalidateRect(m_hEditPassword, nullptr, TRUE);
@@ -354,6 +347,10 @@ void MainWindow::OnClearClicked() {
     SetWindowTextW(m_hEditOutput, L"");
     SetStatusText(L" Tüm alanlar temizlendi.");
     SetFocus(m_hEditInput);
+}
+
+void MainWindow::OnAboutClicked() {
+    AboutDialog::Show(m_hwnd, m_hInstance);
 }
 
 std::wstring MainWindow::GetControlText(HWND hCtrl) const {
@@ -438,6 +435,11 @@ void MainWindow::OnEncryptClicked() {
     LRESULT itemData = SendMessageW(m_hListAlgo, LB_GETITEMDATA, selIndex, 0);
     AlgorithmType selectedAlgo = static_cast<AlgorithmType>(itemData);
 
+    // Seçilen algoritmanın adını ListBox'tan al
+    wchar_t algoNameBuf[64] = {};
+    SendMessageW(m_hListAlgo, LB_GETTEXT, selIndex, (LPARAM)algoNameBuf);
+    std::wstring selectedAlgoName(algoNameBuf);
+
     std::string plaintext = WideToUtf8(inputWide);
     std::string password = WideToUtf8(passWide);
 
@@ -459,10 +461,13 @@ void MainWindow::OnEncryptClicked() {
     }
 
     std::wstring base64Output = Base64::Encode(encryptedPacket);
-    SetWindowTextW(m_hEditOutput, base64Output.c_str());
 
-    std::wstring statusMsg = L" ✔ Başarıyla şifrelendi (AES-256-GCM | Toplam Paket: "
-        + std::to_wstring(encryptedPacket.size()) + L" bayt)";
+    // 6. Madde Gereksinimi: Seçilen algoritmanın adını çıktı alanında da belirt
+    std::wstring formattedOutput = L"[" + selectedAlgoName + L"]\r\n" + base64Output;
+    SetWindowTextW(m_hEditOutput, formattedOutput.c_str());
+
+    std::wstring statusMsg = L" ✔ Başarıyla şifrelendi (" + selectedAlgoName
+        + L" | Toplam Paket: " + std::to_wstring(encryptedPacket.size()) + L" bayt)";
     SetStatusText(statusMsg);
 }
 
@@ -482,7 +487,4 @@ void MainWindow::OnCopyClicked() {
         SetStatusText(L" ❌ Panoya kopyalama başarısız oldu.");
         MessageBoxW(m_hwnd, L"Metin panoya kopyalanırken bir sistem hatası oluştu.", L"Hata", MB_OK | MB_ICONERROR);
     }
-}
-void MainWindow::OnAboutClicked() {
-    AboutDialog::Show(m_hwnd, m_hInstance);
 }

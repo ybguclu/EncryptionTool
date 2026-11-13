@@ -1,11 +1,13 @@
 #include "CryptoManager.h"
 #include "AesGcm.h"
+#include "AesCbc.h"
 #include <openssl/crypto.h>
 
 CryptoManager::CryptoManager() {
-    // İlk aşamada yalnızca uygulanmış olan AES-256-GCM algoritmasını kaydediyoruz.
-    // İleride yeni algoritmalar yazıldıkça sadece buraya bir satır eklenecek:
+    // Yalnızca aktif olarak uygulanmış algoritmaları kaydediyoruz.
+    // Henüz uygulanmayan algoritmalar ListBox'a eklenmez.
     m_algorithms.push_back(std::make_unique<AesGcm>());
+    m_algorithms.push_back(std::make_unique<AesCbc>());
 }
 
 const std::vector<std::unique_ptr<ICryptoAlgorithm>>& CryptoManager::GetAvailableAlgorithms() const {

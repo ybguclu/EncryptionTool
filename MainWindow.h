@@ -33,7 +33,7 @@ private:
     HINSTANCE m_hInstance;
     HWND m_hwnd;
 
-    // Yazı Tipleri ve Fırçalar (Görsel Makyaj)
+    // Yazı Tipleri ve Fırçalar
     HFONT m_hFontTitle;
     HFONT m_hFontSubTitle;
     HFONT m_hFontBold;

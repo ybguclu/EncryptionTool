@@ -270,17 +270,16 @@ void AboutDialog::DrawDialog(HWND hwnd, HDC hdc) {
 }
 
 void AboutDialog::CheckForUpdates(HWND hwnd) {
-    // Örnek Yeni Sürüm Popup'ı (İleride internet üzerindeki version.txt dosyasına bağlanabilir)
     int res = MessageBoxW(
         hwnd,
-        L"🔔 Yeni bir güncelleme kontrolü simülasyonu:\r\n\r\n"
-        L"Mevcut Sürümünüz: v1.0.0\r\n"
-        L"Sunucudaki Son Sürüm: v1.1.0\r\n\r\n"
-        L"Yenilikler:\r\n"
-        L"- Şifre Çözme (Decryption) desteği\r\n"
-        L"- ChaCha20-Poly1305 algoritması\r\n\r\n"
-        L"Yeni sürümü indirme sayfasına gitmek ister misiniz?",
-        L"Yeni Sürüm Yayınlandı!",
+        L"✔ Uygulamanız güncel!\r\n\r\n"
+        L"Mevcut Sürümünüz: v1.0.1 (x64)\r\n\r\n"
+        L"v1.0.1 Yenilikleri:\r\n"
+        L"• AES-256-CBC (Encrypt-then-MAC / HMAC-SHA256) eklendi.\r\n"
+        L"• Sürümlenmiş Base64 çıktı paketi formatı eklendi.\r\n"
+        L"• Geliştirici Hakkında (About) penceresi eklendi.\r\n\r\n"
+        L"GitHub proje sayfasını ziyaret etmek ister misiniz?",
+        L"Sürüm Kontrolü - v1.0.1",
         MB_YESNO | MB_ICONINFORMATION
     );
 
